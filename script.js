@@ -1,4 +1,4 @@
-// Configuración de Firebase (la obtendrás en el Paso 5)
+// Configuración de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDpHCOGmcURKva-4dZoLSjRSB8uDLRonvY",
   authDomain: "juego-cuatro-caballos.firebaseapp.com",
@@ -17,30 +17,40 @@ const database = firebase.database();
 let tablero = [];
 let tamaño = 3;
 let partidaId = Date.now().toString();
-let caballoSeleccionado = null; // Guardará la posición del caballo seleccionado
+let caballoSeleccionado = null;
+let movimientos = 0;
+
+// Elementos del DOM
+const contenedorTablero = document.getElementById("tablero");
+const inputTamaño = document.getElementById("tamano");
+const btnReiniciar = document.getElementById("reiniciar-btn");
+
+// Funciones principales
+function inicializarJuego() {
+  crearTablero();
+  actualizarContador();
+  configurarEventos();
+}
 
 function crearTablero() {
-  tamaño = parseInt(document.getElementById("tamano").value);
-  const contenedor = document.getElementById("tablero");
-  contenedor.innerHTML = "";
-  contenedor.style.gridTemplateColumns = `repeat(${tamaño}, 1fr)`;
+  tamaño = parseInt(inputTamaño.value);
+  contenedorTablero.innerHTML = "";
+  contenedorTablero.style.gridTemplateColumns = `repeat(${tamaño}, 1fr)`;
   
   // Inicializar tablero
   tablero = Array(tamaño).fill().map(() => Array(tamaño).fill(null));
   
-  // Posiciones iniciales de los caballos
+  // Posiciones iniciales
   tablero[0][0] = { color: 'blanco' };
   tablero[0][tamaño-1] = { color: 'blanco' };
   tablero[tamaño-1][0] = { color: 'negro' };
   tablero[tamaño-1][tamaño-1] = { color: 'negro' };
   
-  // Dibujar tablero
   dibujarTablero();
 }
 
 function dibujarTablero() {
-  const contenedor = document.getElementById("tablero");
-  contenedor.innerHTML = "";
+  contenedorTablero.innerHTML = "";
   
   for (let i = 0; i < tamaño; i++) {
     for (let j = 0; j < tamaño; j++) {
@@ -49,6 +59,10 @@ function dibujarTablero() {
       celda.dataset.fila = i;
       celda.dataset.columna = j;
       
+      if (caballoSeleccionado?.fila === i && caballoSeleccionado?.columna === j) {
+        celda.classList.add("seleccionada");
+      }
+      
       if (tablero[i][j]) {
         const caballo = document.createElement("div");
         caballo.className = `caballo ${tablero[i][j].color}`;
@@ -56,38 +70,40 @@ function dibujarTablero() {
       }
       
       celda.addEventListener("click", () => manejarClick(i, j));
-      contenedor.appendChild(celda);
+      contenedorTablero.appendChild(celda);
     }
   }
 }
 
 function manejarClick(fila, columna) {
-  // Si no hay caballo seleccionado y la celda tiene un caballo
+  // Selección de caballo
   if (!caballoSeleccionado && tablero[fila][columna]) {
     caballoSeleccionado = { fila, columna, color: tablero[fila][columna].color };
-    console.log(`Caballo seleccionado: ${fila}, ${columna}`);
+    dibujarTablero();
     return;
   }
 
-  // Si ya hay un caballo seleccionado y se hace clic en una celda vacía
+  // Movimiento válido
   if (caballoSeleccionado && !tablero[fila][columna]) {
     if (esMovimientoValido(caballoSeleccionado, { fila, columna })) {
-      // Mover el caballo
+      // Realizar movimiento
       tablero[fila][columna] = { color: caballoSeleccionado.color };
       tablero[caballoSeleccionado.fila][caballoSeleccionado.columna] = null;
+      movimientos++;
       
-      // Guardar movimiento en Firebase
-      database.ref('partidas/' + partidaId + '/movimientos').push({
-        origen: caballoSeleccionado,
-        destino: { fila, columna },
-        timestamp: Date.now()
-      });
-      
-      // Redibujar tablero y resetear selección
+      // Actualizar interfaz
+      actualizarContador();
       dibujarTablero();
+      
+      // Guardar en Firebase
+      guardarMovimiento(caballoSeleccionado, { fila, columna });
+      
+      // Verificar victoria
+      verificarVictoria();
+      
       caballoSeleccionado = null;
     } else {
-      console.log("Movimiento no válido (no es en 'L')");
+      console.log("Movimiento no válido");
     }
   }
 }
@@ -98,7 +114,51 @@ function esMovimientoValido(origen, destino) {
   return (dx === 2 && dy === 1) || (dx === 1 && dy === 2);
 }
 
-let movimientos = 0;
+function guardarMovimiento(origen, destino) {
+  database.ref('partidas/' + partidaId + '/movimientos').push({
+    origen,
+    destino,
+    timestamp: Date.now(),
+    movimientoNumero: movimientos
+  });
+}
+
+function verificarVictoria() {
+  const victoriaBlancos = tablero[tamaño-1][0]?.color === 'blanco' && 
+                         tablero[tamaño-1][tamaño-1]?.color === 'blanco';
+  const victoriaNegros = tablero[0][0]?.color === 'negro' && 
+                        tablero[0][tamaño-1]?.color === 'negro';
+
+  if (victoriaBlancos && victoriaNegros) {
+    mostrarMensaje(`¡Ganaste en ${movimientos} movimientos!`);
+    database.ref('partidas/' + partidaId).update({ 
+      estado: "ganado",
+      movimientosTotales: movimientos,
+      fechaFin: new Date().toISOString()
+    });
+  }
+}
+
+function mostrarMensaje(texto) {
+  const mensaje = document.createElement("div");
+  mensaje.className = "mensaje-victoria";
+  mensaje.textContent = texto;
+  document.body.appendChild(mensaje);
+  setTimeout(() => mensaje.remove(), 5000);
+}
+
+function reiniciarPartida() {
+  if (database && partidaId) {
+    database.ref('partidas/' + partidaId).remove()
+      .catch(error => console.error("Error al eliminar partida:", error));
+  }
+  
+  partidaId = Date.now().toString();
+  movimientos = 0;
+  caballoSeleccionado = null;
+  crearTablero();
+  actualizarContador();
+}
 
 function actualizarContador() {
   const contadorElement = document.getElementById('contador-movimientos');
@@ -107,95 +167,11 @@ function actualizarContador() {
   }
 }
 
-function reiniciarContador() {
-  movimientos = 0;
-  actualizarContador();
-
-function reiniciarPartida() {
-  // 0. Limpiar datos en Firebase (si existe la referencia)
-  if (database && partidaId) { // Verifica que 'database' esté definido
-    try {
-      database.ref('partidas/' + partidaId).remove()
-        .then(() => console.log("Partida anterior eliminada en Firebase"))
-        .catch(error => console.error("Error al eliminar partida:", error));
-    } catch (e) {
-      console.error("Error en Firebase:", e);
-    }
-  }
-
-  // 1. Generar nueva ID de partida
-  partidaId = Date.now().toString();
-
-  // 2. Resetear variables del juego
-  movimientos = 0;
-  caballoSeleccionado = null;
-  
-  // 3. Volver a crear el tablero
-  crearTablero();
-  
-  // 4. Resetear contador (si existe)
-  if (typeof actualizarContador === 'function') {
-    actualizarContador();
-  }
-
-  console.log("Partida reiniciada correctamente");
-}
-
-// 4. Asignar evento al botón
-document.addEventListener('DOMContentLoaded', () => {
-  const reiniciarBtn = document.getElementById('reiniciar-btn');
-  if (reiniciarBtn) {
-    reiniciarBtn.addEventListener('click', reiniciarPartida);
-  }
-});
-  
-// Inicializar el juego al cargar la página
-window.onload = crearTablero;
-
-// ... (configuración de Firebase y variables anteriores permanecen igual)
-
-function verificarVictoria() {
-  // Posiciones objetivo (inversas a las iniciales)
-  const esquinaSuperiorIzquierda = tablero[0][0];
-  const esquinaSuperiorDerecha = tablero[0][tamaño-1];
-  const esquinaInferiorIzquierda = tablero[tamaño-1][0];
-  const esquinaInferiorDerecha = tablero[tamaño-1][tamaño-1];
-
-  // Condición de victoria: caballos negros arriba, blancos abajo
-  const victoriaBlancosAbajo = 
-    esquinaInferiorIzquierda?.color === 'blanco' && 
-    esquinaInferiorDerecha?.color === 'blanco';
-  const victoriaNegrosArriba = 
-    esquinaSuperiorIzquierda?.color === 'negro' && 
-    esquinaSuperiorDerecha?.color === 'negro';
-
-  if (victoriaBlancosAbajo && victoriaNegrosArriba) {
-    mostrarMensaje("¡Ganaste! Los caballos han intercambiado posiciones.");
-    // Guardar en Firebase que la partida terminó
-    database.ref('partidas/' + partidaId).update({ estado: "ganado" });
+function configurarEventos() {
+  if (btnReiniciar) {
+    btnReiniciar.addEventListener('click', reiniciarPartida);
   }
 }
 
-function mostrarMensaje(texto) {
-  const mensaje = document.createElement("div");
-  mensaje.className = "mensaje-victoria";
-  mensaje.textContent = texto;
-  
-  // Estilo básico (mejorable en CSS)
-  mensaje.style.position = "fixed";
-  mensaje.style.top = "50%";
-  mensaje.style.left = "50%";
-  mensaje.style.transform = "translate(-50%, -50%)";
-  mensaje.style.backgroundColor = "white";
-  mensaje.style.padding = "20px";
-  mensaje.style.border = "2px solid gold";
-  mensaje.style.zIndex = "1000";
-  
-  document.body.appendChild(mensaje);
-  
-  // Eliminar el mensaje después de 5 segundos
-  setTimeout(() => mensaje.remove(), 5000);
-}
-
-// Añadir esta línea al final de la función `manejarClick` (después de mover el caballo):
-verificarVictoria();
+// Inicialización
+window.onload = inicializarJuego;
