@@ -1,0 +1,24 @@
+#tablero {
+  display: grid;
+  gap: 2px;
+  margin: 20px auto;
+  width: 300px;
+  height: 300px;
+}
+
+.celda {
+  background-color: #f0d9b5;
+  border: 1px solid #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.caballo {
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+}
+
+.blanco { background-color: white; border: 2px solid #333; }
+.negro { background-color: black; border: 2px solid #eee; }
