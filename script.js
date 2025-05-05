@@ -68,3 +68,9 @@ function manejarClick(e) {
 
 // Inicializar
 window.onload = crearTablero;
+
+function esMovimientoValido(origen, destino) {
+  const dx = Math.abs(destino.fila - origen.fila);
+  const dy = Math.abs(destino.columna - origen.columna);
+  return (dx === 2 && dy === 1) || (dx === 1 && dy === 2);
+}
