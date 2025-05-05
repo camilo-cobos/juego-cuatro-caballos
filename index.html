@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Juego de los 4 Caballos</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+</head>
+<body>
+  <h1>Juego de los 4 Caballos</h1>
+  <div class="controls">
+    <label>Tamaño del tablero:</label>
+    <input type="number" id="tamano" min="3" max="8" value="3">
+    <button onclick="crearTablero()">Crear Tablero</button>
+  </div>
+  <div id="tablero"></div>
+  <script src="script.js"></script>
+</body>
+</html>
