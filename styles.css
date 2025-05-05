@@ -1,53 +1,56 @@
+/* ===== ESTILOS DEL TABLERO ===== */
 #tablero {
   display: grid;
   gap: 2px;
   margin: 20px auto;
   width: 300px;
   height: 300px;
+  background-color: #bbada0;
+  padding: 10px;
+  border-radius: 5px;
 }
 
+/* ===== ESTILOS DE LAS CELDAS ===== */
 .celda {
   background-color: #f0d9b5;
   border: 1px solid #000;
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.caballo {
-  width: 80%;
-  height: 80%;
-  border-radius: 50%;
-}
-
-.blanco { background-color: white; border: 2px solid #333; }
-.negro { background-color: black; border: 2px solid #eee; }
-
-.seleccionado {
-  border: 3px solid yellow !important;
-}
-
-.mensaje-victoria {
-  background-color: #4CAF50;
-  color: white;
-  padding: 15px 30px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  font-size: 1.2em;
-  text-align: center;
-  animation: zoomIn 0.5s;
-}
-
-@keyframes zoomIn {
-  from { transform: translate(-50%, -50%) scale(0.5); }
-  to { transform: translate(-50%, -50%) scale(1); }
+.celda:hover {
+  background-color: #e8cfa0;
 }
 
 .celda.seleccionada {
   border: 3px solid gold !important;
   background-color: #ffe08c;
+  transform: scale(0.95);
 }
 
+/* ===== ESTILOS DE LOS CABALLOS ===== */
+.caballo {
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.blanco { 
+  background-color: white; 
+  border: 2px solid #333; 
+}
+
+.negro { 
+  background-color: black; 
+  border: 2px solid #eee; 
+}
+
+/* ===== BOTÓN REINICIAR ===== */
 .btn-reiniciar {
   background-color: #f44336;
   color: white;
@@ -57,8 +60,70 @@
   cursor: pointer;
   font-weight: bold;
   margin-left: 10px;
+  transition: all 0.3s ease;
 }
 
 .btn-reiniciar:hover {
   background-color: #d32f2f;
+  transform: translateY(-2px);
+}
+
+/* ===== MENSAJE DE VICTORIA ===== */
+.mensaje-victoria {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #4CAF50;
+  color: white;
+  padding: 20px 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  font-size: 1.2em;
+  text-align: center;
+  z-index: 1000;
+  animation: zoomIn 0.5s;
+}
+
+@keyframes zoomIn {
+  from { 
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5); 
+  }
+  to { 
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1); 
+  }
+}
+
+/* ===== CONTADOR DE MOVIMIENTOS ===== */
+#contador-movimientos {
+  font-weight: bold;
+  margin: 10px 0;
+  font-size: 1.1em;
+  color: #333;
+}
+
+/* ===== CONTROLES DEL JUEGO ===== */
+.controls {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #eee;
+  border-radius: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.controls label {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.controls input {
+  padding: 5px;
+  width: 50px;
+  text-align: center;
 }
