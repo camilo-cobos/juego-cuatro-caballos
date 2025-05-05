@@ -111,6 +111,30 @@ function reiniciarContador() {
   movimientos = 0;
   actualizarContador();
 
+function reiniciarPartida() {
+  // 1. Resetear variables del juego
+  movimientos = 0;
+  caballoSeleccionado = null;
+  
+  // 2. Volver a crear el tablero
+  crearTablero();
+  
+  // 3. Resetear contador (si lo tienes)
+  if (typeof actualizarContador === 'function') {
+    actualizarContador();
+  }
+  
+  console.log("Partida reiniciada");
+}
+
+// 4. Asignar evento al botón
+document.addEventListener('DOMContentLoaded', () => {
+  const reiniciarBtn = document.getElementById('reiniciar-btn');
+  if (reiniciarBtn) {
+    reiniciarBtn.addEventListener('click', reiniciarPartida);
+  }
+});
+  
 // Inicializar el juego al cargar la página
 window.onload = crearTablero;
 
