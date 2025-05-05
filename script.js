@@ -1,12 +1,12 @@
 // Configuración de Firebase (la obtendrás en el Paso 5)
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_PROYECTO.firebaseapp.com",
-  databaseURL: "https://TU_PROYECTO.firebaseio.com",
-  projectId: "TU_PROYECTO",
-  storageBucket: "TU_PROYECTO.appspot.com",
-  messagingSenderId: "TU_SENDER_ID",
-  appId: "TU_APP_ID"
+  apiKey: "AIzaSyDpHCOGmcURKva-4dZoLSjRSB8uDLRonvY",
+  authDomain: "juego-cuatro-caballos.firebaseapp.com",
+  databaseURL: "https://juego-cuatro-caballos-default-rtdb.firebaseio.com",
+  projectId: "juego-cuatro-caballos",
+  storageBucket: "juego-cuatro-caballos.firebasestorage.app",
+  messagingSenderId: "237974220914",
+  appId: "1:237974220914:web:c82f1a6cfed878d1eb92eb"
 };
 
 // Inicializar Firebase
