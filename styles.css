@@ -22,3 +22,7 @@
 
 .blanco { background-color: white; border: 2px solid #333; }
 .negro { background-color: black; border: 2px solid #eee; }
+
+.seleccionado {
+  border: 3px solid yellow !important;
+}
