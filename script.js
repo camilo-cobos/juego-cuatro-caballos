@@ -98,6 +98,19 @@ function esMovimientoValido(origen, destino) {
   return (dx === 2 && dy === 1) || (dx === 1 && dy === 2);
 }
 
+let movimientos = 0;
+
+function actualizarContador() {
+  const contadorElement = document.getElementById('contador-movimientos');
+  if (contadorElement) {
+    contadorElement.textContent = `Movimientos: ${movimientos}`;
+  }
+}
+
+function reiniciarContador() {
+  movimientos = 0;
+  actualizarContador();
+
 // Inicializar el juego al cargar la página
 window.onload = crearTablero;
 
