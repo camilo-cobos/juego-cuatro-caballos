@@ -112,19 +112,33 @@ function reiniciarContador() {
   actualizarContador();
 
 function reiniciarPartida() {
-  // 1. Resetear variables del juego
+  // 0. Limpiar datos en Firebase (si existe la referencia)
+  if (database && partidaId) { // Verifica que 'database' esté definido
+    try {
+      database.ref('partidas/' + partidaId).remove()
+        .then(() => console.log("Partida anterior eliminada en Firebase"))
+        .catch(error => console.error("Error al eliminar partida:", error));
+    } catch (e) {
+      console.error("Error en Firebase:", e);
+    }
+  }
+
+  // 1. Generar nueva ID de partida
+  partidaId = Date.now().toString();
+
+  // 2. Resetear variables del juego
   movimientos = 0;
   caballoSeleccionado = null;
   
-  // 2. Volver a crear el tablero
+  // 3. Volver a crear el tablero
   crearTablero();
   
-  // 3. Resetear contador (si lo tienes)
+  // 4. Resetear contador (si existe)
   if (typeof actualizarContador === 'function') {
     actualizarContador();
   }
-  
-  console.log("Partida reiniciada");
+
+  console.log("Partida reiniciada correctamente");
 }
 
 // 4. Asignar evento al botón
