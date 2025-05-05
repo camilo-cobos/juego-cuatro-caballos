@@ -100,3 +100,51 @@ function esMovimientoValido(origen, destino) {
 
 // Inicializar el juego al cargar la página
 window.onload = crearTablero;
+
+// ... (configuración de Firebase y variables anteriores permanecen igual)
+
+function verificarVictoria() {
+  // Posiciones objetivo (inversas a las iniciales)
+  const esquinaSuperiorIzquierda = tablero[0][0];
+  const esquinaSuperiorDerecha = tablero[0][tamaño-1];
+  const esquinaInferiorIzquierda = tablero[tamaño-1][0];
+  const esquinaInferiorDerecha = tablero[tamaño-1][tamaño-1];
+
+  // Condición de victoria: caballos negros arriba, blancos abajo
+  const victoriaBlancosAbajo = 
+    esquinaInferiorIzquierda?.color === 'blanco' && 
+    esquinaInferiorDerecha?.color === 'blanco';
+  const victoriaNegrosArriba = 
+    esquinaSuperiorIzquierda?.color === 'negro' && 
+    esquinaSuperiorDerecha?.color === 'negro';
+
+  if (victoriaBlancosAbajo && victoriaNegrosArriba) {
+    mostrarMensaje("¡Ganaste! Los caballos han intercambiado posiciones.");
+    // Guardar en Firebase que la partida terminó
+    database.ref('partidas/' + partidaId).update({ estado: "ganado" });
+  }
+}
+
+function mostrarMensaje(texto) {
+  const mensaje = document.createElement("div");
+  mensaje.className = "mensaje-victoria";
+  mensaje.textContent = texto;
+  
+  // Estilo básico (mejorable en CSS)
+  mensaje.style.position = "fixed";
+  mensaje.style.top = "50%";
+  mensaje.style.left = "50%";
+  mensaje.style.transform = "translate(-50%, -50%)";
+  mensaje.style.backgroundColor = "white";
+  mensaje.style.padding = "20px";
+  mensaje.style.border = "2px solid gold";
+  mensaje.style.zIndex = "1000";
+  
+  document.body.appendChild(mensaje);
+  
+  // Eliminar el mensaje después de 5 segundos
+  setTimeout(() => mensaje.remove(), 5000);
+}
+
+// Añadir esta línea al final de la función `manejarClick` (después de mover el caballo):
+verificarVictoria();
